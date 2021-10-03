@@ -1,0 +1,4 @@
+name: WittyStructAPI
+version: ${project.version}
+main: info.ahaha.wittystructapi.WittyStructAPI
+api-version: 1.16
