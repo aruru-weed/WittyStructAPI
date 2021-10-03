@@ -1,6 +1,7 @@
 package info.ahaha.wittystructapi.util;
 
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 
 import java.io.Serializable;
 
@@ -22,6 +23,19 @@ public enum Direction implements Serializable {
                 if(d.getDirection() == direction)
                     return d;
             }
+            return null;
+        }
+
+        public static CardinalDirection byPlayer(Player player){
+            float yaw = player.getLocation().getPitch();
+            if(0 < yaw && yaw <= Math.PI / 2)
+                return CardinalDirection.SOUTH;
+            if(Math.PI / 2 < yaw && yaw <= Math.PI)
+                return CardinalDirection.WEST;
+            if(Math.PI < yaw && yaw <= Math.PI * 3.0 / 2)
+                return CardinalDirection.NORTH;
+            if(Math.PI * 3.0 / 2 < yaw && yaw <= Math.PI * 2)
+                return CardinalDirection.EAST;
             return null;
         }
     }

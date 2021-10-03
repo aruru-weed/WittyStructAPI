@@ -4,6 +4,7 @@ import info.ahaha.wittystructapi.event.StructBreakEvent;
 import info.ahaha.wittystructapi.event.StructPlaceEvent;
 import info.ahaha.wittystructapi.exception.NoSupportedDirectionException;
 import info.ahaha.wittystructapi.util.BlockLocation;
+import info.ahaha.wittystructapi.util.Direction;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
@@ -157,7 +158,7 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
             e.setDropItems(false);
             for (ItemStack stack : event.getDrops()) {
                 Item item = e.getBlock().getWorld().dropItem(e.getPlayer().getLocation(), stack);
-                item.setOwner(e.getPlayer().getUniqueId());
+                // item.setOwner(e.getPlayer().getUniqueId()); 1.6
             }
             t.remove();
             outer().list.remove(t);
@@ -195,7 +196,7 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
                 e.setDropItems(false);
                 for (ItemStack stack : event.getDrops()) {
                     Item item = e.getBlock().getWorld().dropItem(e.getPlayer().getLocation(), stack);
-                    item.setOwner(e.getPlayer().getUniqueId());
+                    // item.setOwner(e.getPlayer().getUniqueId()); 1.6
                 }
                 t.remove();
                 outer().list.remove(t);
@@ -221,21 +222,20 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
                 if (!result.dropsUsing) {
                     callEvent(e, t);
                     return;
-                } else {
-                    StructBreakEvent event = new StructBreakEvent(e.getPlayer(), outer(), t, e.getBlock(), result.drops);
-                    getServer().getPluginManager().callEvent(event);
-                    if (event.isCancelled()) {
-                        e.setCancelled(true);
-                        return;
-                    }
-                    e.setDropItems(false);
-                    for (ItemStack stack : event.getDrops()) {
-                        Item item = e.getBlock().getWorld().dropItem(e.getPlayer().getLocation(), stack);
-                        item.setOwner(e.getPlayer().getUniqueId());
-                    }
-                    t.remove();
-                    outer().list.remove(t);
                 }
+                StructBreakEvent event = new StructBreakEvent(e.getPlayer(), outer(), t, e.getBlock(), result.drops);
+                getServer().getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    e.setCancelled(true);
+                    return;
+                }
+                e.setDropItems(false);
+                for (ItemStack stack : event.getDrops()) {
+                    Item item = e.getBlock().getWorld().dropItem(e.getPlayer().getLocation(), stack);
+                    // item.setOwner(e.getPlayer().getUniqueId()); 1.6
+                }
+                t.remove();
+                outer().list.remove(t);
             }
         }
 
@@ -245,10 +245,10 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
                 if (!e.getItemInHand().isSimilar(keyItem))
                     return;
                 try {
-                    if (!b.canPlace(e.getBlock(), e.getPlayer().getFacing()))
+                    if (!b.canPlace(e.getBlock(), Direction.CardinalDirection.byPlayer(e.getPlayer()).getDirection().toBlockFace()))
                         return;
                     e.setCancelled(true);
-                    outer().add((T) b.place(e.getBlock(), e.getPlayer().getFacing()));
+                    outer().add((T) b.place(e.getBlock(), Direction.CardinalDirection.byPlayer(e.getPlayer()).getDirection().toBlockFace()));
                 } catch (NoSupportedDirectionException exception) {
                     e.getPlayer().sendMessage("No supported Direction.(対応していない向きです)");
                 }
@@ -259,7 +259,7 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
             @EventHandler
             public void on(BlockPlaceEvent e) {
                 try {
-                    if (!outer().getBlueprint().canPlace(e.getBlock(), e.getPlayer().getFacing()))
+                    if (!outer().getBlueprint().canPlace(e.getBlock(), Direction.CardinalDirection.byPlayer(e.getPlayer()).getDirection().toBlockFace()))
                         return;
                     StructPlaceEvent event = new StructPlaceEvent(e.getPlayer(), outer(), e.getBlock(), b, e.getItemInHand());
                     getPluginManager().callEvent(event);
@@ -267,7 +267,7 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
                         return;
                     }
                     e.setCancelled(true);
-                    outer().add((T) b.place(e.getBlock(), e.getPlayer().getFacing()));
+                    outer().add((T) b.place(e.getBlock(), Direction.CardinalDirection.byPlayer(e.getPlayer()).getDirection().toBlockFace()));
                 } catch (NoSupportedDirectionException exception) {
                     e.getPlayer().sendMessage("No supported Direction.(対応していない向きです)");
                     return;
@@ -286,7 +286,7 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
             public void on(BlockPlaceEvent e) {
                 if (f.f(e, outer())) {
                     try {
-                        if (!outer().getBlueprint().canPlace(e.getBlock(), e.getPlayer().getFacing()))
+                        if (!outer().getBlueprint().canPlace(e.getBlock(), Direction.CardinalDirection.byPlayer(e.getPlayer()).getDirection().toBlockFace()))
                             return;
                         StructPlaceEvent event = new StructPlaceEvent(e.getPlayer(), outer(), e.getBlock(), b, e.getItemInHand());
                         getPluginManager().callEvent(event);
@@ -294,7 +294,7 @@ public class StructContainer<T extends Struct, B extends Blueprint> implements S
                             return;
                         }
                         e.setCancelled(true);
-                        outer().add((T) b.place(e.getBlock(), e.getPlayer().getFacing()));
+                        outer().add((T) b.place(e.getBlock(), Direction.CardinalDirection.byPlayer(e.getPlayer()).getDirection().toBlockFace()));
                     } catch (NoSupportedDirectionException exception) {
                         e.getPlayer().sendMessage("No supported Direction.(対応していない向きです)");
                     }
